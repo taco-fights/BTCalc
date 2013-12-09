@@ -1,0 +1,61 @@
+Sub AutoUpdate()
+    Dim interval As String
+    interval = "00:00:" & Sheets("Settings").Range("A2")
+
+If ThisWorkbook.Worksheets("BTCalc").Shapes("AutoUpdate").ControlFormat.Value = 1 Then
+    alertTime = Now + TimeValue(interval)
+    Application.OnTime alertTime, "Sheet1.ReadSite"
+        
+End If
+
+End Sub
+
+
+Sub ReadSite()
+
+    Dim ie As Object
+    Dim sResult As String
+    Dim sFinal As String
+    Dim dtTimer As Date
+    Dim lAddTime As Long
+    Dim lngPrice As Long
+    Dim strFind As String
+    Dim iCharCount As Integer
+    Dim interval As String
+    interval = "00:00:" & Sheets("Settings").Range("A2")
+    
+    Const lREADYSTATE_COMPLETE As Long = 4
+
+    Set ie = CreateObject("InternetExplorer.Application")
+    ie.silent = True
+    
+    If ThisWorkbook.Worksheets("Settings").Shapes("MtGox").ControlFormat.Value = 1 Then
+    ie.navigate "http://www.bitcoinity.org/markets/mtgox/USD"
+    Sheets("Settings").Range("B5") = "MtGox"
+    ElseIf ThisWorkbook.Worksheets("Settings").Shapes("Bitstamp").ControlFormat.Value = 1 Then
+    ie.navigate "http://www.bitcoinity.org/markets/bitstamp/USD"
+    Sheets("Settings").Range("B5") = "Bitstamp"
+    End If
+    
+    dtTimer = Now
+    lAddTime = TimeValue("00:00:05")
+
+    Do Until ie.readystate = lREADYSTATE_COMPLETE And Not ie.busy
+        DoEvents
+        If dtTimer + lAddTime > Now Then Exit Do
+    Loop
+
+    sResult = ie.document.getElementById("last_price").innertext
+    Sheets("Settings").Range("A1") = sResult
+    
+    ie.Quit
+    Set ie = Nothing
+    
+    If ThisWorkbook.Worksheets("BTCalc").Shapes("AutoUpdate").ControlFormat.Value = 1 Then
+    alertTime = Now + TimeValue(interval)
+    Application.OnTime alertTime, "Sheet1.ReadSite"
+        
+    End If
+
+End Sub
+
