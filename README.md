@@ -3,10 +3,7 @@ BTCalc
 
 AutoUpdated Bitcoin Ledger
 
-...And if you wanted to cast some magic internet money my way, 
-
-I'd be forever grateful: 6h7VjxsBynUxHhs4zd3DnmnhhkkqSMRjU
-
+If you wanted to cast some magic internet money my way, I'd be forever grateful: 6h7VjxsBynUxHhs4zd3DnmnhhkkqSMRjU
 
 
 13.12.9 - Added Settings tab w/ auto update interval and exchange server options
