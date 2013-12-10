@@ -3,7 +3,7 @@ BTCalc
 
 AutoUpdated Bitcoin Ledger
 
-If you wanted to cast some magic internet money my way, I'd be forever grateful: 6h7VjxsBynUxHhs4zd3DnmnhhkkqSMRjU
+Feel free to cast some magic internet money my way, maybe I'll buy a talking goat or maybe I'll just use it to increase my BAC: 6h7VjxsBynUxHhs4zd3DnmnhhkkqSMRjU
 
 13.12.10 - Added a more user friendly buy/sell function and minimized gains calc (for tax purposes)
 
