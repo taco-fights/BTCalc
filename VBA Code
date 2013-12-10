@@ -1,61 +1,159 @@
-Sub AutoUpdate()
-    Dim interval As String
-    interval = "00:00:" & Sheets("Settings").Range("A2")
+Sub BoughtBTC()
 
-If ThisWorkbook.Worksheets("BTCalc").Shapes("AutoUpdate").ControlFormat.Value = 1 Then
-    alertTime = Now + TimeValue(interval)
-    Application.OnTime alertTime, "Sheet1.ReadSite"
-        
-End If
+Dim numBtc As Double
+Dim purchDate As Date
+Dim priceBtc As Double
+Dim exchFeeP As Double
+Dim exchFee As Double
+Dim bankFee As Double
+Dim Total As Double
+Dim nextRow As Integer
 
-End Sub
+numBtc = Application.InputBox("How many BTC were purchased?", "", 1, , , , , 1)
+    If numBtc = 0 Then Exit Sub
+purchDate = Application.InputBox("When were these purchased?", "", Date, , , , , 2)
+    If purchDate = False Then Exit Sub
+priceBtc = Application.InputBox("At what price was the BTC purchased?", "", Sheets("BTCalc").Range("D6"), , , , , 1)
+    If priceBtc = 0 Then Exit Sub
+exchFeeP = Application.InputBox("Enter the fee percentage charged by the exchange" & vbNewLine & "(1% typ for coinbase)", "", Sheets("Settings").Range("A6"), , , , , 1)
+exchFee = exchFeeP * priceBtc * numBtc
+bankFee = Application.InputBox("Enter the fee charged by your bank per transaction", "", Sheets("Settings").Range("A7"), , , , , 1)
 
+Total = numBtc * priceBtc + exchFee + bankFee
 
-Sub ReadSite()
+'MsgBox ("Number of BTC Purchased: " & numBtc & vbNewLine & "Purchase Price: " & Format(priceBtc, "$#.00") & vbNewLine & "Exchange Fee: " & Format(exchFee, "$#.00") & vbNewLine & "Bank Fee: " & Format(bankFee, "$0.00") & vbNewLine & "Total Cost: " & Format(Total, "$#.00"))
 
-    Dim ie As Object
-    Dim sResult As String
-    Dim sFinal As String
-    Dim dtTimer As Date
-    Dim lAddTime As Long
-    Dim lngPrice As Long
-    Dim strFind As String
-    Dim iCharCount As Integer
-    Dim interval As String
-    interval = "00:00:" & Sheets("Settings").Range("A2")
-    
-    Const lREADYSTATE_COMPLETE As Long = 4
+nextRow = Range("C" & Rows.Count).End(xlUp).Row + 1
 
-    Set ie = CreateObject("InternetExplorer.Application")
-    ie.silent = True
-    
-    If ThisWorkbook.Worksheets("Settings").Shapes("MtGox").ControlFormat.Value = 1 Then
-    ie.navigate "http://www.bitcoinity.org/markets/mtgox/USD"
-    Sheets("Settings").Range("B5") = "MtGox"
-    ElseIf ThisWorkbook.Worksheets("Settings").Shapes("Bitstamp").ControlFormat.Value = 1 Then
-    ie.navigate "http://www.bitcoinity.org/markets/bitstamp/USD"
-    Sheets("Settings").Range("B5") = "Bitstamp"
-    End If
-    
-    dtTimer = Now
-    lAddTime = TimeValue("00:00:05")
-
-    Do Until ie.readystate = lREADYSTATE_COMPLETE And Not ie.busy
-        DoEvents
-        If dtTimer + lAddTime > Now Then Exit Do
-    Loop
-
-    sResult = ie.document.getElementById("last_price").innertext
-    Sheets("Settings").Range("A1") = sResult
-    
-    ie.Quit
-    Set ie = Nothing
-    
-    If ThisWorkbook.Worksheets("BTCalc").Shapes("AutoUpdate").ControlFormat.Value = 1 Then
-    alertTime = Now + TimeValue(interval)
-    Application.OnTime alertTime, "Sheet1.ReadSite"
-        
-    End If
+Sheets("BTCalc").Range("B" & nextRow) = Format(purchDate, "mm/dd/yyyy")
+Sheets("BTCalc").Range("C" & nextRow) = numBtc
+Sheets("BTCalc").Range("D" & nextRow) = priceBtc
+Sheets("BTCalc").Range("E" & nextRow) = exchFeeP
+Sheets("BTCalc").Range("F" & nextRow) = "=C" & nextRow & " * D" & nextRow & " * E" & nextRow
+Sheets("BTCalc").Range("G" & nextRow) = bankFee / numBtc
+Sheets("BTCalc").Range("H" & nextRow) = "=C" & nextRow & " * D" & nextRow & " + F" & nextRow & " + G" & nextRow & " * C" & nextRow
+Sheets("BTCalc").Range("I" & nextRow) = "=C" & nextRow & " * D6"
+Sheets("BTCalc").Range("J" & nextRow) = "=I" & nextRow & " - H" & nextRow
+Sheets("BTCalc").Range("A" & nextRow) = "=H" & nextRow & " / C" & nextRow
 
 End Sub
+Sub SoldBTC()
 
+Dim currentBtc As Double    'Total bitcoins currently owned
+Dim numBtc As Double        'Number of bitcoin sold
+Dim stashBtc As Double      'Number of bitcoins in stash cell
+Dim stashRem As Double      'Remainder after subtracting sold bitcoins
+Dim saleDate As Date        'Date bitcions were sold
+Dim iCell As Integer        'Cell counter
+Dim cellDate As Date        'Date bitcoin was purchased
+Dim exchFeeP As Double      'Exchange fee percentage
+Dim exchFee As Double       'Exchange fee
+Dim bankFee As Double       'Bank fee
+Dim saleYield As Double     'Amount earned from sale
+Dim maxVal As Double        'Max purchase cost of applicable bitcoin range (based on sale date)
+Dim maxRow As Integer       'Row of maxVal
+Dim salePrice As Double     'User Input bitcoin sale price (excluding fees)
+Dim purchPrice As Double    'Total purchase price for numBtc
+Dim nextRow As Integer      'Row counter
+Dim maxSale As Double       'Max available to sell by date
+
+currentBtc = Sheets("BTCalc").Range("B6")
+stashRem = 0
+iCell = 19
+cellDate = Sheet1.Range("B" & iCell).Value
+nextRow = Range("L" & Rows.Count).End(xlUp).Row + 1
+
+numBtc = Application.InputBox("How many BTC were sold?", "", 0.25, , , , , 1)
+    If numBtc = 0 Then Exit Sub
+        If numBtc > currentBtc Then
+        MsgBox ("You only have " & currentBtc & " bitcoins")
+        Exit Sub
+    End If
+    
+saleDate = Application.InputBox("When were these sold?", "", Date, , , , , 2)
+    If saleDate < cellDate Then
+    MsgBox ("We'll just call you Bernie Madoff..." & vbNewLine & "since you're trying to sell bitcoins before you even had them")
+    Exit Sub
+    End If
+    If saleDate > Date Then
+    MsgBox ("Hey Marty, slow down! You just entered a date from the future!")
+    Exit Sub
+    End If
+    If saleDate = 0 Then
+    Exit Sub
+    End If
+    
+salePrice = Application.InputBox("At what price was the BTC sold?", "", Sheets("BTCalc").Range("D6"), , , , , 1)
+    If salePrice = 0 Then Exit Sub
+    
+exchFeeP = Application.InputBox("Enter the fee percentage charged by the exchange" & vbNewLine & "(1% typ for coinbase)", "", Sheets("Settings").Range("A6"), , , , , 1)
+
+exchFee = exchFeeP * salePrice * numBtc
+
+bankFee = Application.InputBox("Enter the fee charged by your bank per transaction", "", Sheets("Settings").Range("A7"), , , , , 1)
+
+saleYield = numBtc * salePrice - exchFee - bankFee
+
+Do
+    iCell = 19
+        Do Until saleDate < Sheet1.Range("B" & iCell + 1).Value Or Sheet1.Range("B" & iCell + 1) = Empty
+        iCell = iCell + 1
+        cellDate = Sheet1.Range("B" & iCell).Value
+        Loop
+    
+    maxSale = Application.Sum(Range("C19:C" & iCell))
+    
+    If maxSale < numBtc Then
+    MsgBox "I sorry Dave, I'm afraid I can't do that...." & vbNewLine & "You're trying to sell more bitcoins than you purchased by this date" & vbNewLine & vbNewLine & "Maximum you can sell by this date: " & maxSale
+    Exit Sub
+    End If
+    
+        Do Until Sheet1.Range("C" & iCell) > 0
+        iCell = iCell - 1
+            If iCell < 19 Then
+            MsgBox "I sorry Dave, I'm afraid I can't do that...." & vbNewLine & "You're trying to sell more bitcoins than you purchased by this date" & vbNewLine & vbNewLine & "Maximum you can sell by this date: " & maxSale
+            Exit Sub
+            End If
+        Loop
+    
+    
+    maxVal = Application.Max(Range("A19:A" & iCell))
+    maxRow = Application.WorksheetFunction.Match(maxVal, Range("A1:A" & iCell))
+    
+    purchCost = Sheets("BTCalc").Range("A" & maxRow) * numBtc
+    stashBtc = Sheets("BTCalc").Range("C" & maxRow) - numBtc
+        
+        If stashBtc < 0 Then
+        stashRem = -1 * stashBtc
+        stashBtc = 0
+        End If
+    
+    Sheets("BTCalc").Range("C" & maxRow) = stashBtc
+        
+        If stashBtc <= 0 Then
+        Sheets("BTCalc").Range("A" & maxRow) = 0
+        End If
+    
+    If stashRem = numBtc Then
+    stashRem = 0
+    End If
+    
+    Sheets("BTCalc").Range("L" & nextRow) = numBtc - stashRem
+    Sheets("BTCalc").Range("M" & nextRow) = cellDate
+    Sheets("BTCalc").Range("N" & nextRow) = purchCost
+    Sheets("BTCalc").Range("O" & nextRow) = cellDate
+    Sheets("BTCalc").Range("P" & nextRow) = saleYield
+    Sheets("BTCalc").Range("Q" & nextRow) = "=P" & nextRow & " - N" & nextRow
+    
+    numBtc = stashRem
+    nextRow = nextRow + 1
+
+Loop Until stashRem = 0
+
+End Sub
+Sub BoughtItem()
+MsgBox "Purchase Item Feature Coming Soon"
+End Sub
+Sub SoldItem()
+MsgBox "Sell Item Feature Coming Soon"
+End Sub
