@@ -5,6 +5,7 @@ AutoUpdated Bitcoin Ledger
 
 If you wanted to cast some magic internet money my way, I'd be forever grateful: 6h7VjxsBynUxHhs4zd3DnmnhhkkqSMRjU
 
+13.12.10 - Added a more user friendly buy/sell function and minimized gains calc (for tax purposes)
 
 13.12.9 - Added Settings tab w/ auto update interval and exchange server options
 
