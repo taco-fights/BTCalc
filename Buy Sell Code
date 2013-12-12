@@ -15,15 +15,18 @@ purchDate = Application.InputBox("When were these purchased?", "", Date, , , , ,
     If purchDate = False Then Exit Sub
 priceBtc = Application.InputBox("At what price was the BTC purchased?", "", Sheets("BTCalc").Range("D6"), , , , , 1)
     If priceBtc = 0 Then Exit Sub
-exchFeeP = Application.InputBox("Enter the fee percentage charged by the exchange" & vbNewLine & "(1% typ for coinbase)", "", Sheets("Settings").Range("A6"), , , , , 1)
+exchFeeP = Application.InputBox("Enter the fee percentage charged by the exchange" & vbNewLine & "(1% typ for coinbase)", "", Sheets("Settings").Range("B6"), , , , , 1)
 exchFee = exchFeeP * priceBtc * numBtc
-bankFee = Application.InputBox("Enter the fee charged by your bank per transaction", "", Sheets("Settings").Range("A7"), , , , , 1)
+bankFee = Application.InputBox("Enter the fee charged by your bank per transaction", "", Sheets("Settings").Range("B7"), , , , , 1)
 
 Total = numBtc * priceBtc + exchFee + bankFee
 
 'MsgBox ("Number of BTC Purchased: " & numBtc & vbNewLine & "Purchase Price: " & Format(priceBtc, "$#.00") & vbNewLine & "Exchange Fee: " & Format(exchFee, "$#.00") & vbNewLine & "Bank Fee: " & Format(bankFee, "$0.00") & vbNewLine & "Total Cost: " & Format(Total, "$#.00"))
 
 nextRow = Range("C" & Rows.Count).End(xlUp).Row + 1
+Sheet1.Range("B" & nextRow & ":J" & nextRow).Copy
+Sheet1.Range("B" & nextRow + 1).Insert Shift:=xlDown
+Application.CutCopyMode = False
 
 Sheets("BTCalc").Range("B" & nextRow) = Format(purchDate, "mm/dd/yyyy")
 Sheets("BTCalc").Range("C" & nextRow) = numBtc
@@ -71,6 +74,9 @@ numBtc = Application.InputBox("How many BTC were sold?", "", 0.25, , , , , 1)
     End If
     
 saleDate = Application.InputBox("When were these sold?", "", Date, , , , , 2)
+    If saleDate = 0 Then
+    Exit Sub
+    End If
     If saleDate < cellDate Then
     MsgBox ("We'll just call you Bernie Madoff..." & vbNewLine & "since you're trying to sell bitcoins before you even had them")
     Exit Sub
@@ -79,22 +85,19 @@ saleDate = Application.InputBox("When were these sold?", "", Date, , , , , 2)
     MsgBox ("Hey Marty, slow down! You just entered a date from the future!")
     Exit Sub
     End If
-    If saleDate = 0 Then
-    Exit Sub
-    End If
+
     
 salePrice = Application.InputBox("At what price was the BTC sold?", "", Sheets("BTCalc").Range("D6"), , , , , 1)
     If salePrice = 0 Then Exit Sub
     
-exchFeeP = Application.InputBox("Enter the fee percentage charged by the exchange" & vbNewLine & "(1% typ for coinbase)", "", Sheets("Settings").Range("A6"), , , , , 1)
+exchFeeP = Application.InputBox("Enter the fee percentage charged by the exchange" & vbNewLine & "(1% typ for coinbase)", "", Sheets("Settings").Range("B6"), , , , , 1)
 
-exchFee = exchFeeP * salePrice * numBtc
+exchFee = exchFeeP * salePrice
 
-bankFee = Application.InputBox("Enter the fee charged by your bank per transaction", "", Sheets("Settings").Range("A7"), , , , , 1)
-
-saleYield = numBtc * salePrice - exchFee - bankFee
+bankFee = Application.InputBox("Enter the fee charged by your bank per transaction", "", Sheets("Settings").Range("B7"), , , , , 1) / numBtc
 
 Do
+
     iCell = 19
         Do Until saleDate < Sheet1.Range("B" & iCell + 1).Value Or Sheet1.Range("B" & iCell + 1) = Empty
         iCell = iCell + 1
@@ -120,9 +123,10 @@ Do
     maxVal = Application.Max(Range("A19:A" & iCell))
     maxRow = Application.WorksheetFunction.Match(maxVal, Range("A1:A" & iCell))
     
-    purchCost = Sheets("BTCalc").Range("A" & maxRow) * numBtc
     stashBtc = Sheets("BTCalc").Range("C" & maxRow) - numBtc
-        
+    purchCost = Sheets("BTCalc").Range("A" & maxRow)
+    cellDate = Sheets("BTCalc").Range("B" & maxRow)
+    
         If stashBtc < 0 Then
         stashRem = -1 * stashBtc
         stashBtc = 0
@@ -131,17 +135,20 @@ Do
     Sheets("BTCalc").Range("C" & maxRow) = stashBtc
         
         If stashBtc <= 0 Then
-        Sheets("BTCalc").Range("A" & maxRow) = 0
+        Sheets("BTCalc").Range("A" & maxRow & ":J" & maxRow).Delete Shift:=xlUp
         End If
     
     If stashRem = numBtc Then
     stashRem = 0
     End If
     
+
+    saleYield = (numBtc - stashRem) * salePrice - ((exchFee + bankFee) * (numBtc - stashRem))
+    
     Sheets("BTCalc").Range("L" & nextRow) = numBtc - stashRem
     Sheets("BTCalc").Range("M" & nextRow) = cellDate
-    Sheets("BTCalc").Range("N" & nextRow) = purchCost
-    Sheets("BTCalc").Range("O" & nextRow) = cellDate
+    Sheets("BTCalc").Range("N" & nextRow) = purchCost * (numBtc - stashRem)
+    Sheets("BTCalc").Range("O" & nextRow) = saleDate
     Sheets("BTCalc").Range("P" & nextRow) = saleYield
     Sheets("BTCalc").Range("Q" & nextRow) = "=P" & nextRow & " - N" & nextRow
     
