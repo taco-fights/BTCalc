@@ -1,6 +1,6 @@
 Sub AutoUpdate()
     Dim interval As String
-    interval = "00:00:" & Sheets("Settings").Range("A2")
+    interval = "00:00:" & Sheets("Settings").Range("B2")
 
 If ThisWorkbook.Worksheets("BTCalc").Shapes("AutoUpdate").ControlFormat.Value = 1 Then
     alertTime = Now + TimeValue(interval)
@@ -22,7 +22,7 @@ Sub ReadSite()
     Dim strFind As String
     Dim iCharCount As Integer
     Dim interval As String
-    interval = "00:00:" & Sheets("Settings").Range("A2")
+    interval = "00:00:" & Sheets("Settings").Range("B2")
     
     Const lREADYSTATE_COMPLETE As Long = 4
 
@@ -31,10 +31,10 @@ Sub ReadSite()
     
     If ThisWorkbook.Worksheets("Settings").Shapes("MtGox").ControlFormat.Value = 1 Then
     ie.navigate "http://www.bitcoinity.org/markets/mtgox/USD"
-    Sheets("Settings").Range("B5") = "MtGox"
+    Sheets("Settings").Range("C5") = "MtGox"
     ElseIf ThisWorkbook.Worksheets("Settings").Shapes("Bitstamp").ControlFormat.Value = 1 Then
     ie.navigate "http://www.bitcoinity.org/markets/bitstamp/USD"
-    Sheets("Settings").Range("B5") = "Bitstamp"
+    Sheets("Settings").Range("C5") = "Bitstamp"
     End If
     
     dtTimer = Now
@@ -46,7 +46,7 @@ Sub ReadSite()
     Loop
 
     sResult = ie.document.getElementById("last_price").innertext
-    Sheets("Settings").Range("A1") = sResult
+    Sheets("Settings").Range("B1") = sResult
     
     ie.Quit
     Set ie = Nothing
@@ -56,6 +56,13 @@ Sub ReadSite()
     Application.OnTime alertTime, "Sheet1.ReadSite"
         
     End If
+    
+    If Sheet2.Range("B8") = "On" Then
+        If Sheet2.Range("E5") = "ENTER ADDRESS TO USE" Then
+        Sheet2.Range("B8") = "Off"
+        Exit Sub
+        End If
+    Module2.PriceAlert
+    End If
 
 End Sub
-
