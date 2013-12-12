@@ -1,0 +1,74 @@
+Sub PriceAlert()
+
+Dim ContCheck As String
+Dim ContInt As Double
+Dim LowAlert As Double
+Dim HighAlert As Double
+Dim CurPrice As Double
+Dim AlertMsg As String
+Dim LowSent As String
+Dim HighSent As String
+
+ContCheck = Sheet2.Range("E6")
+ContInt = Sheet2.Range("G6")
+LowAlert = Sheet2.Range("E7")
+HighAlert = Sheet2.Range("E8")
+CurPrice = Sheet2.Range("B1") * 1000
+LowSent = Sheet2.Range("H7")
+HighSent = Sheet2.Range("H8")
+
+If ContCheck = "No" Then
+ContInt = False
+End If
+
+If Not Sheet2.Range("G7") = "SENT" Then
+If CurPrice <= LowAlert Then
+AlertMsg = "Low Price Alert"
+SendAlert Format(CurPrice, "$#.00") & " per BTC", AlertMsg
+Sheet2.Range("G7") = "SENT"
+Sheet2.Range("H7") = Now
+End If
+End If
+
+If Not Sheet2.Range("G8") = "SENT" Then
+If CurPrice >= HighAlert Then
+AlertMsg = "High Price Alert"
+SendAlert Format(CurPrice, "$#.00") & " per BTC", AlertMsg
+Sheet2.Range("G8") = "SENT"
+Sheet2.Range("H8") = Now
+End If
+End If
+
+End Sub
+
+Sub SendAlert(PriceAlert As String, paAlert As String)
+'For Tips see: http://www.rondebruin.nl/win/winmail/Outlook/tips.htm
+'Working in Office 2000-2013600
+    Dim OutApp As Outlook.Application
+    Dim OutMail As Outlook.MailItem
+    Dim strsubject As String
+    Dim Address As String
+    
+    Set OutApp = CreateObject("Outlook.Application")
+    Set OutMail = OutApp.CreateItem(olMailItem)
+
+    strsubject = "BTCalc " & paAlert & ": " & PriceAlert
+    Address = Sheet2.Range("E5")
+
+    On Error Resume Next
+    With OutMail
+        .To = Address
+        .CC = ""
+        .BCC = ""
+        .Subject = strsubject
+        .Body = "This is your BTCalc " & paAlert
+        .Send
+    End With
+    On Error GoTo 0
+
+    Set OutMail = Nothing
+    Set OutApp = Nothing
+    'MsgBox ("Email Sent To: " & Address & vbNewLine & "Subject: " & strsubject & vbNewLine & "Body:" & vbNewLine & paAlert & vbNewLine & strsubject)
+    
+End Sub
+
