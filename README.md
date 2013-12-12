@@ -5,6 +5,8 @@ AutoUpdated Bitcoin Ledger
 
 Feel free to cast some magic internet money my way, maybe I'll buy a talking goat or maybe I'll just use it to increase my BAC: 16h7VjxsBynUxHhs4zd3DnmnhhkkqSMRjU
 
+13.12.12 - Fixed a few small errors I found, Added SMS/Email Price Alert.
+
 13.12.10 - Added a more user friendly buy/sell function and minimized gains calc (for tax purposes)
 
 13.12.9 - Added Settings tab w/ auto update interval and exchange server options
