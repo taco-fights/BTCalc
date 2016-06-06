@@ -3,7 +3,7 @@ BTCalc
 
 AutoUpdated Bitcoin Ledger
 
-Feel free to cast some magic internet money my way, maybe I'll buy a talking goat or maybe I'll just use it to increase my BAC: 16h7VjxsBynUxHhs4zd3DnmnhhkkqSMRjU
+Feel free to cast some magic internet money my way, maybe I'll buy a talking goat or maybe I'll just use it to increase my BAC: 19XvVSt19ewN3rPPt1wJvRnfbvmMUxFDV4
 
 13.12.12 - Fixed a few small errors I found, Added SMS/Email Price Alert.
 
